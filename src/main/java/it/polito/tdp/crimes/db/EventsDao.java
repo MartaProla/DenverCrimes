@@ -5,7 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+
+import it.polito.tdp.crimes.model.Adiacenza;
 import it.polito.tdp.crimes.model.Event;
 
 
@@ -75,12 +78,10 @@ public class EventsDao {
 					System.out.println(res.getInt("id"));
 				}
 			}
-			
 			conn.close();
 			return result ;
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null ;
 		}
@@ -114,5 +115,46 @@ public class EventsDao {
 				}
 	
 		}
+	public List<Adiacenza> getAdiacenze(int mese, String evento) {
+		String sql=	"SELECT e1.offense_type_id AS of1, e2.offense_type_id AS of2, COUNT(DISTINCT(e1.neighborhood_id)) AS tot "+
+					"FROM events e1, events e2 "+
+					"WHERE  e1.offense_type_id!= e2.offense_type_id "+
+					"AND MONTH(e1.reported_date)= ?  AND MONTH(e2.reported_date)= ? "+
+					"AND e1.offense_category_id= ? AND e2.offense_category_id= ? "+
+					"AND e1.neighborhood_id=e2.neighborhood_id "+
+					"GROUP BY e1.offense_type_id, e2.offense_type_id";
+		List<Adiacenza>adiacenze=new LinkedList<>();
+					try {
+						Connection conn = DBConnect.getConnection() ;
+						PreparedStatement st = conn.prepareStatement(sql) ;
+						st.setInt(1, mese);
+						st.setInt(2, mese);
+						st.setString(3, evento);
+						st.setString(4, evento);
+						
+						List<String> result = new ArrayList<>() ;
+						ResultSet res = st.executeQuery() ;
+						
+						while(res.next()) {
+							try {
+								Adiacenza a =new Adiacenza(res.getString("of1"),res.getString("of2"),res.getDouble("tot"));
+								adiacenze.add(a);
+								
+							} catch (Throwable t) {
+								t.printStackTrace();
+								System.out.println(res.getInt("id"));
+							}
+						}
+						
+						conn.close();
+						return adiacenze ;
+					
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return null ;
+							}
+				
+	}
 
 }

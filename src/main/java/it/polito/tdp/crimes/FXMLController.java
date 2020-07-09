@@ -5,8 +5,10 @@
 package it.polito.tdp.crimes;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.crimes.model.Arco;
 import it.polito.tdp.crimes.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -49,6 +51,27 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	txtResult.clear();
+    	String categoria= this.boxCategoria.getValue();
+    	if(categoria==null) {
+    		txtResult.appendText("Seleziona categoria");
+    		return;
+    	}
+    	Integer mese=this.boxMese.getValue();
+    	if(mese==null) {
+    		txtResult.appendText("Seleziona categoria");
+    		return;
+    	}
+    	if(mese!=null && categoria!=null)
+    		this.model.creaGrafo(mese, categoria);
+    	
+    	List<Arco>archi=this.model.pesoMaggiorePesoMedioGrafo();
+    	txtResult.appendText("Archi > Peso medio : \n \n");
+    	for (Arco a: archi) {
+    		txtResult.appendText(a.toString()+"\n");
+    	}
+    	
+    	
 
     }
 
